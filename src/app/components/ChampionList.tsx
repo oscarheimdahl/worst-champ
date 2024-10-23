@@ -4,7 +4,7 @@ import { ChampionButton } from './ChampionButton';
 import { useState } from 'react';
 import { Reorder } from 'framer-motion';
 import { Champion } from '../page';
-import { upvoteChampion } from '../actions';
+import { upvoteChampionAction } from '../actions';
 
 export const ChampionList = ({
   initialChampions,
@@ -25,9 +25,14 @@ export const ChampionList = ({
           }
           return item;
         })
-        .toSorted((a, b) => b.votes - a.votes)
+        .toSorted((a, b) => {
+          if (b.votes === a.votes) {
+            return a.name.localeCompare(b.name); // Sort alphabetically if votes are equal
+          }
+          return b.votes - a.votes;
+        })
     );
-    const ok = await upvoteChampion(champion.id);
+    const ok = await upvoteChampionAction(champion.id);
     if (!ok) alert('Error');
   };
 

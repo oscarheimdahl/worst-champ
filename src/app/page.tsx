@@ -11,8 +11,6 @@ export type Champion = {
 export default async function Home() {
   const champions = (await getChampions()) as Champion[];
 
-  console.log(champions);
-
   return (
     <div className='w-full h-full overflow-scroll'>
       <Background />
