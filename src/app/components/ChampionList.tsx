@@ -1,26 +1,35 @@
 'use client';
 
-import { champions as _champions } from '@/app/data/champions';
 import { ChampionButton } from './ChampionButton';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Reorder } from 'framer-motion';
+import { Champion } from '../page';
+import { upvoteChampion } from '../actions';
 
-function shuffleArray<T>(array: T[]) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
+export const ChampionList = ({
+  initialChampions,
+}: {
+  initialChampions: Champion[];
+}) => {
+  const [champions, setChampions] = useState(initialChampions);
 
-export const ChampionList = () => {
-  const [champions, setChampions] = useState(_champions);
-
-  useEffect(() => {
-    setInterval(() => {
-      setChampions((prev) => [...shuffleArray(prev)]);
-    }, 10000);
-  }, []);
+  const upvote = async (champion: Champion) => {
+    setChampions((prev) =>
+      prev
+        .map((item) => {
+          if (item.id === champion.id) {
+            return {
+              ...item,
+              votes: item.votes + 1,
+            };
+          }
+          return item;
+        })
+        .toSorted((a, b) => b.votes - a.votes)
+    );
+    const ok = await upvoteChampion(champion.id);
+    if (!ok) alert('Error');
+  };
 
   return (
     <Reorder.Group
@@ -44,7 +53,7 @@ export const ChampionList = () => {
             <span className={'absolute pointer-events-none sr-only'}>
               {champion.name.replace('_', ' ')}
             </span>
-            <ChampionButton>
+            <ChampionButton onClick={() => upvote(champion)}>
               <img
                 className={
                   'pointer-events-none select-none size-full transition-transform scale-110'

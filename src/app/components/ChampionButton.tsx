@@ -1,7 +1,7 @@
 import { ReactNode, useState } from 'react';
 import { cn } from '@/app/utils/utils';
 
-interface Floater {
+interface Symbol {
   id: string;
   endX: number;
   endY: number;
@@ -13,8 +13,14 @@ const maxEndDist = 120;
 const minEndDist = 60;
 const floatAnimationDuration = 2000;
 
-export const ChampionButton = ({ children }: { children: ReactNode }) => {
-  const [symbols, setSymbols] = useState<Floater[]>([]);
+export const ChampionButton = ({
+  children,
+  onClick,
+}: {
+  children: ReactNode;
+  onClick: () => void;
+}) => {
+  const [symbols, setSymbols] = useState<Symbol[]>([]);
 
   const spawnSymbol = () => {
     const endPos = randomEndPos();
@@ -38,6 +44,7 @@ export const ChampionButton = ({ children }: { children: ReactNode }) => {
   };
 
   const handleClick = () => {
+    onClick();
     spawnSymbol();
     if (symbols.length > 5) spawnSymbol();
     if (symbols.length > 10) spawnSymbol();
@@ -56,6 +63,7 @@ export const ChampionButton = ({ children }: { children: ReactNode }) => {
                 item.rotation > 0 ? 'text-red-400' : 'text-gray-200'
               } animate-float pointer-events-none select-none`}
               style={{
+                // @ts-ignore
                 '--end-position-x': `${-item.endX}px`,
                 '--end-position-y': `${-item.endY}px`,
                 '--rotation': `${item.rotation}deg`,

@@ -1,10 +1,22 @@
+import { getChampions } from '@/db';
 import { ChampionList } from './components/ChampionList';
+import { champions } from './data/champions';
 
-export default function Home() {
+export type Champion = {
+  name: string;
+  id: string;
+  votes: number;
+};
+
+export default async function Home() {
+  const champions = (await getChampions()) as Champion[];
+
+  console.log(champions);
+
   return (
     <div className='w-full h-full overflow-scroll'>
       <Background />
-      <ChampionList />
+      <ChampionList initialChampions={champions} />
     </div>
   );
 }
