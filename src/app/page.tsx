@@ -33,10 +33,10 @@ const Background = () => {
 
   return (
     <>
-      <div className={'fixed size-full '} style={{ background: gradient1 }} />
-      <div className={'fixed size-full '} style={{ background: gradient2 }} />
-      <div className={'fixed size-full '} style={{ background: gradient3 }} />
-      <div className={'fixed size-full '} style={{ background: gradient4 }} />
+      <div className={'fixed size-full'} style={{ background: gradient1 }} />
+      <div className={'fixed size-full'} style={{ background: gradient2 }} />
+      <div className={'fixed size-full'} style={{ background: gradient3 }} />
+      <div className={'fixed size-full'} style={{ background: gradient4 }} />
 
       <div
         className={'fixed inset-4 border border-white/10'}

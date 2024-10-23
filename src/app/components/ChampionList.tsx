@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Reorder } from 'framer-motion';
 import { Champion } from '../page';
 import { upvoteChampionAction } from '../actions';
+import { cn } from '../utils/utils';
 
 function sortChampions(a: Champion, b: Champion) {
   if (b.votes === a.votes) {
@@ -18,13 +19,15 @@ export const ChampionList = ({
 }: {
   initialChampions: Champion[];
 }) => {
+  const [preventVoteClick, setPreventVoteClick] = useState(false);
   const [champions, setChampions] = useState(
     initialChampions.toSorted(sortChampions)
   );
 
   const upvote = async (champion: Champion) => {
-    setChampions((prev) =>
-      prev
+    let newChampions: Champion[] = [];
+    setChampions((prev) => {
+      const _newChampions = prev
         .map((item) => {
           if (item.id === champion.id) {
             return {
@@ -34,19 +37,36 @@ export const ChampionList = ({
           }
           return item;
         })
-        .toSorted(sortChampions)
+        .toSorted(sortChampions);
+      newChampions = _newChampions;
+      return _newChampions;
+    });
+
+    const orderChanged = !newChampions.every(
+      (champion, i) => champions[i].id === champion.id
     );
+
+    if (orderChanged) {
+      setPreventVoteClick(true);
+      setTimeout(() => {
+        setPreventVoteClick(false);
+      }, 800);
+    }
+
     const ok = await upvoteChampionAction(champion.id);
     if (!ok) alert('Error');
   };
 
   return (
     <Reorder.Group
-      className={'items-center relative w-full gap-6 py-12 flex flex-col'}
+      className={cn(
+        'items-center relative w-full gap-6 py-[300px] flex flex-col',
+        preventVoteClick && 'pointer-events-none'
+      )}
       as='div'
       axis='y'
       values={champions}
-      onReorder={setChampions}
+      onReorder={(c) => setChampions(c)}
     >
       {champions.map((champion) => {
         return (
@@ -56,7 +76,7 @@ export const ChampionList = ({
             value={champion}
             as='div'
             className={
-              'group relative has-[~div:hover]:opacity-30 peer peer-hover:opacity-30 transition-opacity'
+              'group relative has-[~div:hover]:opacity-30 peer peer-hover:opacity-30 transition-opacity duration-1000'
             }
           >
             <span className={'absolute pointer-events-none sr-only'}>
@@ -74,6 +94,5 @@ export const ChampionList = ({
         );
       })}
     </Reorder.Group>
-    // </div>
   );
 };
