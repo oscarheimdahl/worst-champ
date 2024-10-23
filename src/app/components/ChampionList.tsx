@@ -6,18 +6,20 @@ import { Reorder } from 'framer-motion';
 import { Champion } from '../page';
 import { upvoteChampionAction } from '../actions';
 
+function sortChampions(a: Champion, b: Champion) {
+  if (b.votes === a.votes) {
+    return a.name.localeCompare(b.name); // Sort alphabetically if votes are equal
+  }
+  return b.votes - a.votes;
+}
+
 export const ChampionList = ({
   initialChampions,
 }: {
   initialChampions: Champion[];
 }) => {
   const [champions, setChampions] = useState(
-    initialChampions.toSorted((a, b) => {
-      if (b.votes === a.votes) {
-        return a.name.localeCompare(b.name); // Sort alphabetically if votes are equal
-      }
-      return b.votes - a.votes;
-    })
+    initialChampions.toSorted(sortChampions)
   );
 
   const upvote = async (champion: Champion) => {
@@ -32,12 +34,7 @@ export const ChampionList = ({
           }
           return item;
         })
-        .toSorted((a, b) => {
-          if (b.votes === a.votes) {
-            return a.name.localeCompare(b.name); // Sort alphabetically if votes are equal
-          }
-          return b.votes - a.votes;
-        })
+        .toSorted(sortChampions)
     );
     const ok = await upvoteChampionAction(champion.id);
     if (!ok) alert('Error');

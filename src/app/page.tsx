@@ -1,12 +1,13 @@
 import { getChampions } from '@/db';
 import { ChampionList } from './components/ChampionList';
-import { champions } from './data/champions';
 
 export type Champion = {
   name: string;
   id: string;
   votes: number;
 };
+
+export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const champions = (await getChampions()) as Champion[];
