@@ -3,6 +3,8 @@ import { EventEmitter } from 'events';
 import { champions } from '@/app/data/champions';
 import { upvoteChampion } from '@/db';
 
+export const maxDuration = 60;
+
 const votesEmitter = new EventEmitter();
 
 export async function GET(req: NextRequest) {
