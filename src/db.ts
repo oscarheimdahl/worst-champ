@@ -34,8 +34,7 @@ async function seedChampions() {
 }
 
 export async function getChampions() {
-  const res =
-    await client.sql`SELECT * from champions ORDER BY votes DESC, name ASC`;
+  const res = await client.sql`SELECT * from champions ORDER BY votes DESC`;
   return res.rows;
 }
 

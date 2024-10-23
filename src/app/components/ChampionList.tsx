@@ -11,7 +11,14 @@ export const ChampionList = ({
 }: {
   initialChampions: Champion[];
 }) => {
-  const [champions, setChampions] = useState(initialChampions);
+  const [champions, setChampions] = useState(
+    initialChampions.toSorted((a, b) => {
+      if (b.votes === a.votes) {
+        return a.name.localeCompare(b.name); // Sort alphabetically if votes are equal
+      }
+      return b.votes - a.votes;
+    })
+  );
 
   const upvote = async (champion: Champion) => {
     setChampions((prev) =>
