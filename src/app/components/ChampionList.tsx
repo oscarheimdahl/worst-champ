@@ -1,15 +1,13 @@
 'use client';
 
-import { ChampionButton } from './ChampionButton';
-import { useState } from 'react';
 import { Reorder } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 import { Champion } from '../page';
-import { upvoteChampionAction } from '../actions';
-import { cn } from '../utils/utils';
+import { ChampionButton } from './ChampionButton';
 
 function sortChampions(a: Champion, b: Champion) {
   if (b.votes === a.votes) {
-    return a.name.localeCompare(b.name); // Sort alphabetically if votes are equal
+    return a.name.localeCompare(b.name);
   }
   return b.votes - a.votes;
 }
@@ -19,17 +17,27 @@ export const ChampionList = ({
 }: {
   initialChampions: Champion[];
 }) => {
+  const clientId = useRef(Math.random().toString(36).substring(2, 15));
   const [preventVoteClick, setPreventVoteClick] = useState(false);
   const [champions, setChampions] = useState(
     initialChampions.toSorted(sortChampions)
   );
 
-  const upvote = async (champion: Champion) => {
-    let newChampions: Champion[] = [];
-    setChampions((prev) => {
-      const _newChampions = prev
+  useEffect(() => {
+    const eventSource = new EventSource('api/votes'); // Subscribe to the SSE endpoint
+    eventSource.onmessage = async (event) => {
+      const data = JSON.parse(event.data);
+      if (data.clientId === clientId.current) return;
+      await upvote(data.championId);
+    };
+    return () => eventSource.close();
+  }, []);
+
+  const upvote = async (championId: string, castByUser?: boolean) => {
+    setChampions((prevChampions) => {
+      const newChampions = prevChampions
         .map((item) => {
-          if (item.id === champion.id) {
+          if (item.id === championId) {
             return {
               ...item,
               votes: item.votes + 1,
@@ -37,32 +45,37 @@ export const ChampionList = ({
           }
           return item;
         })
-        .toSorted(sortChampions);
-      newChampions = _newChampions;
-      return _newChampions;
+        .slice()
+        .sort(sortChampions);
+      return newChampions;
     });
 
-    const orderChanged = !newChampions.every(
-      (champion, i) => champions[i].id === champion.id
-    );
+    // const orderChanged = !newChampions.every(
+    //   (champion, i) => champions[i].id === champion.id
+    // );
 
-    if (orderChanged) {
-      setPreventVoteClick(true);
-      setTimeout(() => {
-        setPreventVoteClick(false);
-      }, 800);
+    // if (orderChanged) {
+    //   setPreventVoteClick(true);
+    //   setTimeout(() => {
+    //     setPreventVoteClick(false);
+    //   }, 800);
+    // }
+
+    if (!castByUser) return;
+
+    try {
+      await fetch('/api/votes', {
+        method: 'POST',
+        body: JSON.stringify({ championId, clientId: clientId.current }),
+      });
+    } catch (e) {
+      alert('Error');
     }
-
-    const ok = await upvoteChampionAction(champion.id);
-    if (!ok) alert('Error');
   };
 
   return (
     <Reorder.Group
-      className={cn(
-        'items-center relative w-full gap-6 py-[300px] flex flex-col',
-        preventVoteClick && 'pointer-events-none'
-      )}
+      className={'items-center relative w-full gap-6 py-[300px] flex flex-col'}
       as='div'
       axis='y'
       values={champions}
@@ -75,6 +88,7 @@ export const ChampionList = ({
             key={champion.id}
             value={champion}
             as='div'
+            style={{ zIndex: champion.votes }}
             className={
               'group relative has-[~div:hover]:opacity-30 peer peer-hover:opacity-30 transition-opacity duration-1000'
             }
@@ -82,7 +96,10 @@ export const ChampionList = ({
             <span className={'absolute pointer-events-none sr-only'}>
               {champion.name.replace('_', ' ')}
             </span>
-            <ChampionButton onClick={() => upvote(champion)}>
+            <ChampionButton
+              className={preventVoteClick ? 'pointer-events-none' : ''}
+              onClick={() => upvote(champion.id, true)}
+            >
               <img
                 className={
                   'pointer-events-none select-none size-full transition-transform scale-110'

@@ -16,9 +16,11 @@ const floatAnimationDuration = 2000;
 export const ChampionButton = ({
   children,
   onClick,
+  className,
 }: {
   children: ReactNode;
   onClick: () => void;
+  className?: string;
 }) => {
   const [symbols, setSymbols] = useState<Symbol[]>([]);
 
@@ -81,8 +83,8 @@ export const ChampionButton = ({
         className={cn(
           `relative peer rounded-md size-16 flex-none group overflow-hidden transition-all
           outline-white outline-1 hover:scale-125
-            active:translate-y-1 
-           `
+            active:translate-y-1`,
+          className
         )}
       >
         {children}

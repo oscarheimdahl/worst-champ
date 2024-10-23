@@ -3,7 +3,7 @@
 import { champions } from './data/champions';
 import { upvoteChampion } from '../db';
 
-export async function upvoteChampionAction(championId: string) {
+export async function _upvoteChampionAction(championId: string) {
   const champion = champions.find((item) => item.id === championId);
   if (!champion) return false;
 
