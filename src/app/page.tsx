@@ -1,4 +1,4 @@
-import { getChampions } from '@/db';
+import { getChampions } from './api/api';
 import { ChampionList } from './components/ChampionList';
 
 export type Champion = {

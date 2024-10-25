@@ -1,4 +1,4 @@
-import { initDB } from '@/db';
+import { Toaster } from 'sonner';
 import './globals.css';
 
 export default async function RootLayout({
@@ -6,12 +6,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  try {
-    initDB();
-  } catch (e) {
-    console.log(`🔴 Unable to init DB`);
-  }
-
   return (
     <html className={'h-full bg-black'}>
       <head>
@@ -23,6 +17,7 @@ export default async function RootLayout({
         style={{ overscrollBehaviorY: 'none' }}
       >
         {children}
+        <Toaster visibleToasts={1} duration={300000} />
       </body>
     </html>
   );

@@ -1,9 +1,11 @@
 'use client';
-
+import { toast } from 'sonner';
 import { Reorder } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { Champion } from '../page';
 import { ChampionButton } from './ChampionButton';
+import { upvoteChampion } from '../api/api';
+import { socketUrl } from '../utils/env';
 
 function sortChampions(a: Champion, b: Champion) {
   if (b.votes === a.votes) {
@@ -24,13 +26,24 @@ export const ChampionList = ({
   );
 
   useEffect(() => {
-    const eventSource = new EventSource('api/votes'); // Subscribe to the SSE endpoint
-    eventSource.onmessage = async (event) => {
-      const data = JSON.parse(event.data);
-      if (data.clientId === clientId.current) return;
-      await upvote(data.championId);
+    const socket = new WebSocket(socketUrl);
+
+    socket.onmessage = async (event) => {
+      if (event.type === 'message') {
+        const data = JSON.parse(event.data);
+        if (data.type === 'vote') {
+          if (data.clientId === clientId.current) return;
+          await upvote(data.championId);
+        }
+      }
     };
-    return () => eventSource.close();
+    socket.onerror = (error) => {
+      console.error('WebSocket Error:', error);
+    };
+
+    return () => {
+      socket.close();
+    };
   }, []);
 
   const upvote = async (championId: string, castByUser?: boolean) => {
@@ -62,14 +75,10 @@ export const ChampionList = ({
     // }
 
     if (!castByUser) return;
-
     try {
-      await fetch('/api/votes', {
-        method: 'POST',
-        body: JSON.stringify({ championId, clientId: clientId.current }),
-      });
+      await upvoteChampion(championId, clientId.current);
     } catch (e) {
-      alert('Error');
+      customToast('Server Error');
     }
   };
 
@@ -102,7 +111,7 @@ export const ChampionList = ({
             >
               <img
                 className={
-                  'pointer-events-none select-none size-full transition-transform scale-110'
+                  'pointer-events-none select-none size-full transition-transform scale-[1.05]'
                 }
                 src={`/imgs/${champion.name}.jpg`}
               />
@@ -113,3 +122,13 @@ export const ChampionList = ({
     </Reorder.Group>
   );
 };
+
+function customToast(message: string) {
+  toast.custom(() => (
+    <div className='flex text-white rounded-md w-[354px] p-[1px] bg-white right-0 bg-gradient-to-tr from-[hsl(295,67%,10%)] to-[hsl(30,21%,20%)]'>
+      <div className='size-full p-4 rounded-[5px] bg-[#030312]'>
+        <h1>{message}</h1>
+      </div>
+    </div>
+  ));
+}
