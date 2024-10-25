@@ -1,7 +1,9 @@
 import { env } from 'process';
 
 const baseUrl =
-  env.NODE_ENV === 'production' ? 'worst-champ.vercel.app' : 'localhost:8000';
+  env.NODE_ENV === 'production'
+    ? 'worst-champ-server.deno.dev'
+    : 'localhost:8000';
 export const socketUrl = `PROTOCOL://${baseUrl}/socket`.replace(
   'PROTOCOL',
   env.NODE_ENV === 'production' ? 'wss' : 'ws'
