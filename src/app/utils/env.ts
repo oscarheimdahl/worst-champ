@@ -1,14 +1,13 @@
 import { env } from 'process';
 
-const baseUrl =
-  env.NODE_ENV === 'production'
-    ? 'worst-champ-server.deno.dev'
-    : 'localhost:8000';
+const prod = env.NODE_ENV === 'production';
+
+const baseUrl = prod ? 'worst-champ-server.deno.dev' : 'localhost:8000';
 export const socketUrl = `PROTOCOL://${baseUrl}/socket`.replace(
   'PROTOCOL',
-  env.NODE_ENV === 'production' ? 'wss' : 'ws'
+  prod ? 'wss' : 'ws'
 );
 export const apiUrl = `PROTOCOL://${baseUrl}/api`.replace(
   'PROTOCOL',
-  env.NODE_ENV === 'production' ? 'https' : 'http'
+  prod ? 'https' : 'http'
 );
